@@ -11,5 +11,8 @@
   "dependencies": {
     "elysia": "^0.7.29",
     "mongoose": "^8.0.1"
+  },
+  "scripts": {
+    "dev": "bun run --hot index.js"
   }
 }
