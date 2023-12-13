@@ -22,14 +22,6 @@ const WarehouseSchema = new mongoose.Schema({
     stock: []
 });
 
-const ScheduleSchema = new mongoose.Schema({
-    startDate: {
-        type: Date,
-        default: () => new Date.now()
-    },
-    endDate: Date
-})
-
 const EmployeeSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -44,7 +36,15 @@ const EmployeeSchema = new mongoose.Schema({
         type: Boolean,
         require: true
     },
-    schedule: ScheduleSchema
+    schedule: [{
+        day: {
+            type: String,
+            require: true,
+            unique: true
+        },
+        startTime: String,
+        endTime: String
+    }]
 });
 
 const OrderSchema = new mongoose.Schema({
