@@ -32,15 +32,15 @@ const EmployeeSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    availability: {
-        type: Boolean,
-        require: true
-    },
     schedule: [{
         day: {
             type: String,
             require: true,
             unique: true
+        },
+        availability: {
+            type: Boolean,
+            require: true
         },
         startTime: String,
         endTime: String
