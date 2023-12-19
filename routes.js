@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { EmployeeModel } from "./collection_data.js";
+import { EmployeeModel, ProductModel } from "./collection_data.js";
 
 const days = {
     0: "Sunday",
@@ -16,19 +16,29 @@ export function Endpoints() {
         const app = new Elysia().get("/", () => "Hello");
 
         app.group('/employees', app => app
-            .get('/', () => displayEmployees(""))
-            .get('/available', () => displayAvailableEmployees(""))
+            .get('/', async () => displayEmployees(""))
             .group('/drivers', app => app
-                .get('/', () => displayEmployees("Driver"))
-                .get('/available', () => displayAvailableEmployees("Driver"))
-                .get('/available/:day', ({ params: { day } }) => displayAvailableEmployees("Driver", day))
+                .get('/', async () => displayEmployees("Driver"))
+                .get('/available/:day', async ({ params: { day } }) => displayAvailableEmployees("Driver", day))
+                .get('/available/:day/:time', async ({ params: { day, time } }) => displayAvailableEmployees("Driver", day, time))
             )
             .group('/pickers', app => app
-                .get('/', () => displayEmployees("Picker"))
-                .get('/available', () => displayAvailableEmployees("Picker"))
-                .get('/available/:day', ({ params: { day } }) => displayAvailableEmployees("Picker", day))
+                .get('/', async () => displayEmployees("Picker"))
+                .get('/available/:day', async ({ params: { day } }) => displayAvailableEmployees("Picker", day))
+                .get('/available/:day/:time', async ({ params: { day, time } }) => displayAvailableEmployees("Picker", day, time))
             )
         );
+
+        app.group('/products', app => app
+            .get('/', () => displayProducts(""))
+            .get('/in-stock', () => displayProducts("inStock"))
+            .get('/:pName', ({ params: { pName } }) => displayProducts(pName))
+        );
+
+        //.get("/:productName", ({ params: { productName } }) => {
+        //     productName = productName.replaceAll(/_/g, / /g);
+        // });
+
 
         app.listen(25565);
         console.log(`Running at http://${app.server?.hostname}:${app.server?.port}`);
@@ -69,38 +79,92 @@ async function displayEmployees(employeeType) {
 }
 
 
-async function displayAvailableEmployees(employeeType, selectedDay) {
-    if (employeeType === "") {
-        return (await EmployeeModel
-            .find({})
-            .exec())
-            .filter(e => e.schedule.availability)
-            .map(e => {
-                return {
-                    name: e.name,
-                    warehouseId: e.warehouseId,
-                    job: e.job,
-                    schedule: e.schedule
-                }
-            });
-    } else {
+async function displayAvailableEmployees(employeeType, selectedDay, selectedTime) {
+    if (selectedDay && !selectedTime) {
         let allEmployees = (await EmployeeModel.find({}).exec());
         let okEmployees = [];
 
         selectedDay = selectedDay == "Today" ? days[new Date().getDay()] : selectedDay;
 
-        if (selectedDay) {
-            allEmployees.filter(w => w.schedule.forEach(d => {
-                if (d.availability && d.day == selectedDay) {
-                    okEmployees.push(w);
-                }
-            }));
-        } else {
-            okEmployees = allEmployees;
-        }
+        allEmployees.filter(w => w.schedule.forEach(s => {
+
+            if (s.day == selectedDay) {
+                okEmployees.push(w);
+            }
+        }));
 
         okEmployees = okEmployees.filter(w => w.job == employeeType);
 
         return okEmployees;
-    };
+
+    } else if (selectedDay && selectedTime) {
+        let allEmployees = (await EmployeeModel.find({}).exec());
+        let okEmployees = [];
+
+        selectedTime = selectedTime == "Now" ? new Date().getHours : selectedTime;
+
+        allEmployees.filter(w => w.schedule.forEach(s => {
+            if (s.day == selectedDay && s.startHour <= selectedTime && s.endHour >= selectedTime) {
+                okEmployees.push(w);
+            }
+        }));
+
+        okEmployees = okEmployees.filter(w => w.job == employeeType);
+
+        return okEmployees;
+    }
+}
+
+async function displayProducts(status) {
+    if (status == "") {
+        return (await ProductModel
+            .find({})
+            .exec())
+            .map(p => {
+                return {
+                    name: p.name,
+                    productId: p.productId,
+                    warehouseId: p.warehouseId,
+                    stock: p.stock,
+                    shelf: p.shelf,
+                    price: p.price,
+                    weight: p.weight
+                }
+            });
+    } else if (status == "inStock") {
+        return (await ProductModel
+            .find({})
+            .exec())
+            .filter(p => p.stock > 0)
+            .map(p => {
+                return {
+                    name: p.name,
+                    productId: p.productId,
+                    warehouseId: p.warehouseId,
+                    stock: p.stock,
+                    shelf: p.shelf,
+                    price: p.price,
+                    weight: p.weight
+                }
+            })
+    } else {
+        console.log(status.replaceAll('_', ' '));
+        let inputName = status.replaceAll('_', ' ');
+
+        return (await ProductModel
+            .find({})
+            .exec())
+            .filter(p => p.name == inputName)
+            .map(p => {
+                return {
+                    name: p.name,
+                    productId: p.productId,
+                    warehouseId: p.warehouseId,
+                    stock: p.stock,
+                    shelf: p.shelf,
+                    price: p.price,
+                    weight: p.weight
+                }
+            })
+    }
 }

@@ -1,5 +1,5 @@
 import { ProductModel, WarehouseModel, EmployeeModel, OrderModel } from "./collection_data.js";
-import { employeeNames, productNames, productPrices, weekdays } from "./data.json";
+import { employeeNames, productNames, productPrices, weekdays, orderStatus } from "./data.json";
 
 const warehouseAmount = 10;
 const employeeAmount = employeeNames.length;
@@ -16,7 +16,7 @@ function randomDate(start, end) {
 }
 
 export async function CreateWarehouse() {
-    // WarehouseModel.collection.drop();
+    await WarehouseModel.collection.drop();
     if (await WarehouseModel.exists() == null) {
         for (let i = 0; i < warehouseAmount; i++) {
             await WarehouseModel.create({
@@ -31,16 +31,21 @@ export async function CreateEmployee() {
     await EmployeeModel.collection.drop();
     if (await EmployeeModel.exists() == null) {
         let assignedWarehouse = [];
-
+        
         for (let employeeIndex = 0; employeeIndex < employeeAmount; employeeIndex++) {
             let fullSchedule = [];
-
+            
             for (let dayIndex = 0; dayIndex < weekdays.length; dayIndex++) {
+                let startHour = randomMinMax(7, 9);
+                let endHour = randomMinMax(15, 17);
+
                 fullSchedule[dayIndex] = {
                     day: weekdays[dayIndex],
-                    availability: Math.random() < 0.5,
-                    startTime: `0${randomMinMax(7, 9)}:00`,
-                    endTime: `${randomMinMax(15, 17)}:00`
+                    availability: true,
+                    startTime: `0${startHour}:00`,
+                    endTime: `${endHour}:00`,
+                    startHour: startHour,
+                    endHour: endHour
                 };
             }
 
@@ -86,28 +91,27 @@ export async function CreateProduct() {
 export async function CreateOrder() {
     await OrderModel.collection.drop();
     if (await OrderModel.exists() == null) {
-        let productsInOrder = [];
+        let allWarehouses = await WarehouseModel.find({}).exec();
+        let allProducts = await ProductModel.find({}).exec();
+        let allOrders = [];
 
         for (let i = 0; i < orderAmount; i++) {
-            (await WarehouseModel.find().exec()).forEach(async (w) => {
-                (await ProductModel.find().exec()).forEach(async (p) => {
-                    if (p.warehouseId === w.id) {
-                        productsInOrder.push(p);
-                    };
-                });
+            let productsInOrder = [];
+            let selectedWarehouse = randomMinMax(0, warehouseAmount - 1);
+
+            productsInOrder = allProducts.filter(p => {
+                return p.warehouseId == selectedWarehouse;
             });
 
-            if (!productsInOrder.length == 0) {
-                await OrderModel.create({
-                    products: productsInOrder,
-                    orderNumber: i,
-                    datePlaced: randomDate(new Date(2023, 10, 1), new Date()),
-                    totalPrice: productsInOrder.map(obj => obj.price).reduce((sum, val) => sum + val, 0),
-                    totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0)
-                });
-            }
-
-            productsInOrder = [];
+            allOrders.push({
+                products: productsInOrder,
+                orderNumber: i,
+                datePlaced: randomDate(new Date(2023, 10, 1), new Date()),
+                totalPrice: productsInOrder.map(obj => obj.price).reduce((sum, val) => sum + val, 0),
+                totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0)
+            });
         };
+
+        await OrderModel.insertMany([ ...allOrders ]);
     };
 }

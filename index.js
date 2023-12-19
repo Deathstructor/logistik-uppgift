@@ -12,10 +12,10 @@ async function Run() {
             console.log(`Successfully connected to ${mongoose.connection.name}`)
         });
 
-        CreateWarehouse();
-        CreateEmployee();
-        CreateProduct();
-        CreateOrder();
+        await CreateWarehouse();
+        await CreateEmployee();
+        await CreateProduct();
+        await CreateOrder();
 
         Endpoints();
 
