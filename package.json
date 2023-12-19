@@ -13,6 +13,6 @@
     "mongoose": "^8.0.1"
   },
   "scripts": {
-    "dev": "bun run --hot index.js"
+    "dev": "bun run --watch index.js"
   }
 }
