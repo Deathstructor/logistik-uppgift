@@ -6,7 +6,8 @@ const ProductSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    id: Number,
+    productId: Number,
+    warehouseId: Number,
     stock: Number,
     shelf: Number,
     price: Number,
@@ -48,7 +49,12 @@ const EmployeeSchema = new mongoose.Schema({
 });
 
 const OrderSchema = new mongoose.Schema({
-    id: Number,
+    products: [],
+    orderNumber: Number,
+    datePlaced: Date,
+    totalPrice: Number,
+    totalWeight: Number,
+    assignedPicker: String
 });
 
 export const ProductModel = mongoose.model("Product", ProductSchema);

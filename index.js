@@ -6,13 +6,22 @@ import { employeeNames, jobs, productNames, productPrices, weekdays } from "./da
 
 let url = `mongodb+srv://chastainpaul:${Bun.env.MONGOOSE_PASSWORD}@logistikuppgift.1erd8t4.mongodb.net/LogistikDB?retryWrites=true&w=majority`;
 
+// Randomizers
+function randomMinMax(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function randomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+}
+
 const warehouseAmount = 10;
 const employeeAmount = employeeNames.length;
-const orderAmount = Math.random() * 50;
+const orderAmount = randomMinMax(5, 20);
 const productAmount = productNames.length;
-const fullSchedule = [];
+// const fullSchedule = [];
 
-const days = { 
+const days = {
     0: "Sunday",
     1: "Monday",
     2: "Tuesday",
@@ -20,10 +29,6 @@ const days = {
     4: "Thursday",
     5: "Friday",
     6: "Saturday"
-}
-
-function randomMinMax(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
 Run();
@@ -36,6 +41,7 @@ async function Run() {
 
         const app = new Elysia().get("/", () => "Hello");
 
+        // WarehouseModel.collection.drop();
         if (await WarehouseModel.exists() == null) {
             for (let i = 0; i < warehouseAmount; i++) {
                 await WarehouseModel.create({
@@ -44,29 +50,51 @@ async function Run() {
                 });
             }
         }
+
+        await EmployeeModel.collection.drop();
         if (await EmployeeModel.exists() == null) {
-            for (let i = 0; i < employeeAmount; i++) {
-                for (let i = 0; i < weekdays.length; i++) {
-                    fullSchedule[i] = {
-                        day: weekdays[i],
+            let assignedWarehouse = [];
+
+            for (let employeeIndex = 0; employeeIndex < employeeAmount; employeeIndex++) {
+                let fullSchedule = [];
+
+                for (let dayIndex = 0; dayIndex < weekdays.length; dayIndex++) {
+                    fullSchedule[dayIndex] = {
+                        day: weekdays[dayIndex],
                         availability: Math.random() < 0.5,
                         startTime: `0${randomMinMax(7, 9)}:00`,
                         endTime: `${randomMinMax(15, 17)}:00`
                     };
                 }
+
+                let warehouseNum = 0;
+                let employeeJob = [];
+                for (let j = 0; j < employeeAmount; j += 2) {
+                    assignedWarehouse[j] = warehouseNum;
+                    assignedWarehouse[j + 1] = warehouseNum;
+
+                    employeeJob[j] = "Picker";
+                    employeeJob[j + 1] = "Driver";
+
+                    warehouseNum++;
+                }
+
                 await EmployeeModel.create({
-                    name: employeeNames[i],
-                    warehouseId: Math.floor(Math.random() * warehouseAmount),
-                    job: jobs[Math.floor(Math.random() * 2)],
+                    name: employeeNames[employeeIndex],
+                    warehouseId: assignedWarehouse[employeeIndex],
+                    job: employeeJob[employeeIndex],
                     schedule: fullSchedule
                 });
             }
         }
+
+        await ProductModel.collection.drop();
         if (await ProductModel.exists() == null) {
             for (let i = 0; i < productAmount; i++) {
                 await ProductModel.create({
                     name: productNames[i],
-                    id: Math.floor(Math.random() * warehouseAmount),
+                    productId: i,
+                    warehouseId: Math.floor(Math.random() * warehouseAmount),
                     stock: Math.floor(Math.random() * 50),
                     shelf: Math.floor(Math.random() * 20),
                     price: productPrices[i],
@@ -75,6 +103,32 @@ async function Run() {
             }
         }
 
+        await OrderModel.collection.drop();
+        if (await OrderModel.exists() == null) {
+            let productsInOrder = [];
+
+            for (let i = 0; i < orderAmount; i++) {
+                (await WarehouseModel.find().exec()).forEach(async (w) => {
+                    (await ProductModel.find().exec()).forEach(async (p) => {
+                        if (p.warehouseId === w.id) {
+                            productsInOrder.push(p);
+                        };
+                    });
+                });
+
+                if (!productsInOrder.length == 0) {
+                    await OrderModel.create({
+                        products: productsInOrder,
+                        orderNumber: i,
+                        datePlaced: randomDate(new Date(2023, 10, 1), new Date()),
+                        totalPrice: productsInOrder.map(obj => obj.price).reduce((sum, val) => sum + val, 0),
+                        totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0)
+                    });
+                }
+                
+                productsInOrder = [];
+            };
+        };
 
 
         app.group('/employees', app => app
@@ -143,13 +197,13 @@ async function displayAvailableEmployees(employeeType, selectedDay) {
                     job: e.job,
                     schedule: e.schedule
                 }
-            })
+            });
     } else {
         let allEmployees = (await EmployeeModel.find({}).exec());
         let okEmployees = [];
 
         selectedDay = selectedDay == "Today" ? days[new Date().getDay()] : selectedDay;
-        
+
         if (selectedDay) {
             allEmployees.filter(w => w.schedule.forEach(d => {
                 if (d.availability && d.day == selectedDay) {
@@ -160,9 +214,7 @@ async function displayAvailableEmployees(employeeType, selectedDay) {
             okEmployees = allEmployees;
         }
 
-        okEmployees = okEmployees.filter(w => w.job == employeeType)
-
-        console.log(days[new Date().getDay()]);
+        okEmployees = okEmployees.filter(w => w.job == employeeType);
 
         return okEmployees;
     };
