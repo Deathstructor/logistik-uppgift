@@ -1,4 +1,3 @@
-
 import mongoose, { Mongoose } from "mongoose";
 
 const ProductSchema = new mongoose.Schema({
@@ -19,8 +18,7 @@ const WarehouseSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    id: Number,
-    stock: []
+    id: Number
 });
 
 const EmployeeSchema = new mongoose.Schema({
@@ -39,12 +37,10 @@ const EmployeeSchema = new mongoose.Schema({
             require: true,
             unique: true
         },
-        availability: {
-            type: Boolean,
-            require: true
-        },
         startTime: String,
-        endTime: String
+        endTime: String,
+        startHour: Number,
+        endHour: Number
     }]
 });
 
@@ -54,7 +50,8 @@ const OrderSchema = new mongoose.Schema({
     datePlaced: Date,
     totalPrice: Number,
     totalWeight: Number,
-    assignedPicker: String
+    assignedPicker: String,
+    status: String
 });
 
 export const ProductModel = mongoose.model("Product", ProductSchema);
