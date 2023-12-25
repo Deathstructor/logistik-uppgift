@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
-import { EmployeeModel, ProductModel } from "./collection_data.js";
+import { EmployeeModel, OrderModel, ProductModel } from "./collection_data.js";
+import { get } from "mongoose";
 
 const days = {
     0: "Sunday",
@@ -35,10 +36,10 @@ export function Endpoints() {
             .get('/:pName', ({ params: { pName } }) => displayProducts(pName))
         );
 
-        //.get("/:productName", ({ params: { productName } }) => {
-        //     productName = productName.replaceAll(/_/g, / /g);
-        // });
-
+        app.group('/orders', app => app
+            .get('/', () => displayOrders(""))
+            .get('/:status', ({ params: { status } }) => displayOrders(status))
+        );
 
         app.listen(25565);
         console.log(`Running at http://${app.server?.hostname}:${app.server?.port}`);
@@ -77,7 +78,6 @@ async function displayEmployees(employeeType) {
     }
 
 }
-
 
 async function displayAvailableEmployees(employeeType, selectedDay, selectedTime) {
     if (selectedDay && !selectedTime) {
@@ -164,6 +164,39 @@ async function displayProducts(status) {
                     shelf: p.shelf,
                     price: p.price,
                     weight: p.weight
+                }
+            })
+    }
+}
+
+async function displayOrders(status) {
+    if (status === ""){
+        return (await OrderModel
+            .find({})
+            .exec())
+            .map(o => {
+                return {
+                    products: o.products,
+                    orderNumber: o.orderNumber,
+                    datePlaced: o.datePlaced,
+                    totalPrice: o.totalPrice,
+                    totalWeight: o.totalWeight,
+                    status: o.status
+                }
+            })
+    } else {
+        return (await OrderModel
+            .find({})
+            .exec())
+            .filter(o => o.status == status)
+            .map(o => {
+                return {
+                    products: o.products,
+                    orderNumber: o.orderNumber,
+                    datePlaced: o.datePlaced,
+                    totalPrice: o.totalPrice,
+                    totalWeight: o.totalWeight,
+                    status: o.status
                 }
             })
     }

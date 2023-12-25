@@ -91,7 +91,6 @@ export async function CreateProduct() {
 export async function CreateOrder() {
     await OrderModel.collection.drop();
     if (await OrderModel.exists() == null) {
-        let allWarehouses = await WarehouseModel.find({}).exec();
         let allProducts = await ProductModel.find({}).exec();
         let allOrders = [];
 
@@ -103,12 +102,15 @@ export async function CreateOrder() {
                 return p.warehouseId == selectedWarehouse;
             });
 
+
+
             allOrders.push({
                 products: productsInOrder,
                 orderNumber: i,
                 datePlaced: randomDate(new Date(2023, 10, 1), new Date()),
                 totalPrice: productsInOrder.map(obj => obj.price).reduce((sum, val) => sum + val, 0),
-                totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0)
+                totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0),
+                status: orderStatus[randomMinMax(0, orderStatus.length)]
             });
         };
 
