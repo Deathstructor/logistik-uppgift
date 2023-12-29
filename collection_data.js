@@ -31,6 +31,7 @@ const EmployeeSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    assignedOrder: Number,
     schedule: [{
         day: {
             type: String,

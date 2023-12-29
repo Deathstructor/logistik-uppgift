@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
 import { EmployeeModel, OrderModel, ProductModel } from "./collection_data.js";
-import { get } from "mongoose";
 
 const days = {
     0: "Sunday",
@@ -59,7 +58,8 @@ async function displayEmployees(employeeType) {
                     name: e.name,
                     warehouseId: e.warehouseId,
                     job: e.job,
-                    schedule: e.schedule
+                    schedule: e.schedule,
+                    assignedOrder: e.assignedOrder
                 }
             });
     } else {
@@ -72,7 +72,8 @@ async function displayEmployees(employeeType) {
                     name: e.name,
                     warehouseId: e.warehouseId,
                     job: e.job,
-                    schedule: e.schedule
+                    schedule: e.schedule,
+                    assignedOrder: e.assignedOrder
                 }
             });
     }

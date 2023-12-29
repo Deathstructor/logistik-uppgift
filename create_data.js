@@ -102,7 +102,9 @@ export async function CreateOrder() {
                 return p.warehouseId == selectedWarehouse;
             });
 
-
+            if (randomMinMax(0, 5) > 0) {
+                await EmployeeModel.findOneAndUpdate({ warehouseId: selectedWarehouse }, { assignedOrder: i })
+            }
 
             allOrders.push({
                 products: productsInOrder,
