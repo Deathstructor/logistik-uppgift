@@ -1,5 +1,5 @@
-import { ProductModel, WarehouseModel, EmployeeModel, OrderModel } from "./collection_data.js";
-import { employeeNames, productNames, productPrices, weekdays, orderStatus } from "./data.json";
+import { ProductModel, WarehouseModel, EmployeeModel, OrderModel, MonthDataModel} from "./collection_data.js";
+import { employeeNames, productNames, productPrices, weekdays, orderStatus, months } from "./data.json";
 
 const warehouseAmount = 10;
 const employeeAmount = employeeNames.length;
@@ -9,11 +9,11 @@ const productAmount = productNames.length;
 // Randomizers
 function randomMinMax(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
-}
+};
 
 function randomDate(start, end) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
-}
+};
 
 export async function CreateWarehouse() {
     await WarehouseModel.collection.drop();
@@ -86,7 +86,7 @@ export async function CreateProduct() {
             });
         }
     }
-}
+};
 
 export async function CreateOrder() {
     await OrderModel.collection.drop();
@@ -118,4 +118,40 @@ export async function CreateOrder() {
 
         await OrderModel.insertMany([ ...allOrders ]);
     };
-}
+};
+
+export async function CreateMonthData() {
+    await MonthDataModel.collection.drop();
+    if (await MonthDataModel.exists() == null) {
+        let allProducts = await ProductModel.find({}).exec();
+
+        for (let i = 0; i < months.length; i++) {
+            let productsInOrder = [];
+            let selectedWarehouse = randomMinMax(0, warehouseAmount - 1);
+
+            productsInOrder = allProducts.filter(p => {
+                return p.warehouseId == selectedWarehouse;
+            });
+
+            let setOrderStatus = "";
+            if (i === months.length - 1) {
+                setOrderStatus = orderStatus[randomMinMax(0, orderStatus.length)];
+            } else {
+                setOrderStatus = orderStatus[4];
+            };
+
+            await MonthDataModel.create({
+                month: months[i],
+                income: randomMinMax(65000, 125000),
+                mostExpensiveOrder: {
+                    products: productsInOrder,
+                    orderNumber: randomMinMax(1, 20),
+                    datePlaced: new Date(2023, 0, randomMinMax(1, 29)),
+                    totalPrice: productsInOrder.map(obj => obj.price).reduce((sum, val) => sum + val, 0),
+                    totalWeight: productsInOrder.map(obj => obj.weight).reduce((sum, val) => sum + val, 0),
+                    status: setOrderStatus
+                }
+            });
+        };
+    };
+};

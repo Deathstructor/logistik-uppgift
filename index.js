@@ -1,7 +1,7 @@
 import mongoose, { Mongoose } from "mongoose";
 
 import { Endpoints } from "./routes.js";
-import { CreateWarehouse, CreateEmployee, CreateProduct, CreateOrder } from "./create_data.js";
+import { CreateWarehouse, CreateEmployee, CreateProduct, CreateOrder, CreateMonthData } from "./create_data.js";
 
 let url = `mongodb+srv://chastainpaul:${Bun.env.MONGOOSE_PASSWORD}@logistikuppgift.1erd8t4.mongodb.net/LogistikDB?retryWrites=true&w=majority`;
 
@@ -16,6 +16,7 @@ async function Run() {
         await CreateEmployee();
         await CreateProduct();
         await CreateOrder();
+        await CreateMonthData();
 
         Endpoints();
 

@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { EmployeeModel, OrderModel, ProductModel } from "./collection_data.js";
+import { EmployeeModel, MonthDataModel, OrderModel, ProductModel } from "./collection_data.js";
 
 const days = {
     0: "Sunday",
@@ -38,6 +38,11 @@ export function Endpoints() {
         app.group('/orders', app => app
             .get('/', () => displayOrders(""))
             .get('/:status', ({ params: { status } }) => displayOrders(status))
+        );
+
+        app.group('month-data', app => app
+            .get('/', () => displayMonthData(""))
+            .get('/:month', ({ params: {month} }) => displayMonthData(month))
         );
 
         app.listen(25565);
@@ -202,3 +207,30 @@ async function displayOrders(status) {
             })
     }
 }
+
+async function displayMonthData(month) {
+    if (month == "") {
+        return (await MonthDataModel
+            .find({})
+            .exec())
+            .map(m => {
+                return {
+                    month: m.month,
+                    income: m.income,
+                    mostExpensiveOrder: m.mostExpensiveOrder
+                }
+            });
+    } else {
+        return (await MonthDataModel
+            .find({})
+            .exec())
+            .filter(m => m.month == month)
+            .map(m => {
+                return {
+                    month: m.month,
+                    income: m.income,
+                    mostExpensiveOrder: m.mostExpensiveOrder
+                }
+            });
+    };
+};

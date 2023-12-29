@@ -95,6 +95,20 @@
     "Thursday",
     "Friday"
   ],
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
   "orderStatus": [
     "recieved",
     "picking",

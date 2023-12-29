@@ -55,7 +55,14 @@ const OrderSchema = new mongoose.Schema({
     status: String
 });
 
+const MonthDataSchema = new mongoose.Schema({
+    month: String,
+    income: Number,
+    mostExpensiveOrder: {}
+});
+
 export const ProductModel = mongoose.model("Product", ProductSchema);
 export const WarehouseModel = mongoose.model("Warehouse", WarehouseSchema);
 export const EmployeeModel = mongoose.model("Employee", EmployeeSchema);
 export const OrderModel = mongoose.model("Order", OrderSchema);
+export const MonthDataModel = mongoose.model("MonthData", MonthDataSchema);
