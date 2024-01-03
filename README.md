@@ -12,7 +12,7 @@ såsom namn, priser osv har jag skrivit i JSON.
 ### Employees
 http://localhost:25565/employees
 
-http://localhost:25565/employees/drivers\
+http://localhost:25565/employees/drivers  
 http://localhost:25565/employees/drivers/:day - ex Monday (måste vara stor första bokstav)\
 http://localhost:25565/employees/drivers/:day/:time - ex 16 (skrivs endast som timme, ej minuter)
 
@@ -22,7 +22,7 @@ http://localhost:25565/employees/pickers/:day/:time - ex 16 (skrivs endast som t
 
 
 ### Products
-http://localhost:25565/products\
+http://localhost:25565/products  
 http://localhost:25565/products/in-stock\
 http://localhost:25565/products/:pName - ex RTX_3060_Ti (produktnamn med '_' istället för mellanslag)
 
