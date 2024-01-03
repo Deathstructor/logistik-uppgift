@@ -13,31 +13,31 @@ såsom namn, priser osv har jag skrivit i JSON.
 http://localhost:25565/employees
 
 http://localhost:25565/employees/drivers  
-http://localhost:25565/employees/drivers/:day - ex Monday (måste vara stor första bokstav)\
-http://localhost:25565/employees/drivers/:day/:time - ex 16 (skrivs endast som timme, ej minuter)
+http://localhost:25565/employees/drivers/:day - ex Monday (måste vara stor första bokstav)  
+http://localhost:25565/employees/drivers/:day/:time - ex 16 (skrivs endast som timme, ej minuter)  
 
-http://localhost:25565/employees/pickers
-http://localhost:25565/employees/pickers/:day - ex Monday (måste vara stor första bokstav)\
-http://localhost:25565/employees/pickers/:day/:time - ex 16 (skrivs endast som timme, ej minuter)
+http://localhost:25565/employees/pickers  
+http://localhost:25565/employees/pickers/:day - ex Monday (måste vara stor första bokstav)  
+http://localhost:25565/employees/pickers/:day/:time - ex 16 (skrivs endast som timme, ej minuter)  
 
 
 ### Products
 http://localhost:25565/products  
-http://localhost:25565/products/in-stock\
-http://localhost:25565/products/:pName - ex RTX_3060_Ti (produktnamn med '_' istället för mellanslag)
+http://localhost:25565/products/in-stock  
+http://localhost:25565/products/:pName - ex RTX_3060_Ti (produktnamn med '_' istället för mellanslag)  
 
 Lista på alla produktnamn finns nedan.
 
 
 ### Orders
-http://localhost:25565/orders\
-http://localhost:25565/orders/:status - ex picking
+http://localhost:25565/orders  
+http://localhost:25565/orders/:status - ex picking  
 
 Lista på alla orderstatus finns nedan.
 
 
 ### Month Data
-http://localhost:25565/month-data\
+http://localhost:25565/month-data  
 http://localhost:25565/month-data/:month - ex June (måste vara stor första bokstav)
 
 
